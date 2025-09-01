@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TC-10 Multi-threaded Worker Performance Test</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+        }
+        
+        .worker-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .worker-grid {
+            width: 80%;
+            height: 70%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            padding: 20px;
+        }
+        
+        .worker-cell {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .worker-cell.active {
+            background: linear-gradient(45deg, #00d2d3, #54a0ff);
+            box-shadow: 0 0 15px rgba(0, 210, 211, 0.5);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        #stats {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            z-index: 100;
+            min-width: 300px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="worker-container">
+        <div class="worker-grid" id="workerGrid">
+            <div class="worker-cell" data-worker="0">Worker 1</div>
+            <div class="worker-cell" data-worker="1">Worker 2</div>
+            <div class="worker-cell" data-worker="2">Worker 3</div>
+            <div class="worker-cell" data-worker="3">Worker 4</div>
+            <div class="worker-cell" data-worker="4">Worker 5</div>
+            <div class="worker-cell" data-worker="5">Worker 6</div>
+            <div class="worker-cell" data-worker="6">Worker 7</div>
+            <div class="worker-cell" data-worker="7">Worker 8</div>
+            <div class="worker-cell" data-worker="8">Worker 9</div>
+            <div class="worker-cell" data-worker="9">Worker 10</div>
+            <div class="worker-cell" data-worker="10">Worker 11</div>
+            <div class="worker-cell" data-worker="11">Worker 12</div>
+        </div>
+    </div>
+    <div id="stats">
+        <div class="stat-row">
+            <span>Frames:</span>
+            <span id="frameCount">0</span>
+        </div>
+        <div class="stat-row">
+            <span>Drops:</span>
+            <span id="dropCount">0</span>
+        </div>
+        <div class="stat-row">
+            <span>Drop %:</span>
+            <span id="dropPercentage">0.00%</span>
+        </div>
+        <div class="stat-row">
+            <span>FPS:</span>
+            <span id="currentFPS">0</span>
+        </div>
+        <div class="stat-row">
+            <span>Active Workers:</span>
+            <span id="activeWorkers">0</span>
+        </div>
+        <div class="stat-row">
+            <span>Tasks Completed:</span>
+            <span id="tasksCompleted">0</span>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="pb-common/index.js"></script>
+<script type="text/javascript" src="index.js"></script>
+</html> 
