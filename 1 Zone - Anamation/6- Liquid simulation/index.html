@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TC-09 Liquid Tank Swirling Performance Test</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0c1445, #1a2980, #26d0ce);
+        }
+        
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .image-canvas {
+            border: 3px solid rgba(100, 200, 255, 0.5);
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(100, 200, 255, 0.4);
+            background: rgba(0, 20, 50, 0.1);
+        }
+        
+        .filter-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 20, 50, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+            border: 2px solid rgba(100, 200, 255, 0.4);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .filter-controls h3 {
+            margin: 0 0 15px 0;
+            color: #64c8ff;
+            font-size: 18px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(100, 200, 255, 0.5);
+        }
+        
+        .filter-controls label {
+            display: block;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+        
+        .filter-controls label:hover {
+            color: #64c8ff;
+            background: rgba(100, 200, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .filter-controls input[type="checkbox"] {
+            margin-right: 8px;
+            accent-color: #64c8ff;
+            transform: scale(1.2);
+        }
+        
+        #stats {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 20, 50, 0.95);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            z-index: 100;
+            min-width: 320px;
+            border: 2px solid rgba(100, 200, 255, 0.4);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        #stats h3 {
+            margin: 0 0 15px 0;
+            color: #64c8ff;
+            text-align: center;
+            font-size: 16px;
+            text-shadow: 0 0 10px rgba(100, 200, 255, 0.5);
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(100, 200, 255, 0.3);
+            transition: background-color 0.3s ease;
+        }
+        
+        .stat-row:hover {
+            background: rgba(100, 200, 255, 0.1);
+            border-radius: 8px;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #a8d8ff;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            color: #64c8ff;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(100, 200, 255, 0.3);
+        }
+        
+        /* Add some ocean-themed decorative elements */
+        .ocean-bubbles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .bubble {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100px) scale(1);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Ocean bubble background effect -->
+    <div class="ocean-bubbles" id="oceanBubbles"></div>
+    
+    <div class="image-container">
+        <canvas class="image-canvas" id="imageCanvas"></canvas>
+        <div class="filter-controls">
+            <h3>🌊 Liquid Properties</h3>
+            <label>
+                <input type="checkbox" id="blurFilter" checked> 💧 Viscosity
+            </label>
+            <label>
+                <input type="checkbox" id="brightnessFilter" checked> 🌊 Density
+            </label>
+            <label>
+                <input type="checkbox" id="contrastFilter" checked> 🔗 Surface Tension
+            </label>
+            <label>
+                <input type="checkbox" id="saturationFilter" checked> 🎨 Color Intensity
+            </label>
+        </div>
+    </div>
+    <div id="stats">
+        <h3>🌊 Tank Simulation Stats</h3>
+        <div class="stat-row">
+            <span class="stat-label">Frames:</span>
+            <span class="stat-value" id="frameCount">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Drops:</span>
+            <span class="stat-value" id="dropCount">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Drop %:</span>
+            <span class="stat-value" id="dropPercentage">0.00%</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">FPS:</span>
+            <span class="stat-value" id="currentFPS">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Processing Time:</span>
+            <span class="stat-value" id="processingTime">0ms</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Active Properties:</span>
+            <span class="stat-value" id="activeFilters">0</span>
+        </div>
+    </div>
+    
+    <script>
+        // Create floating bubble effect
+        function createBubbles() {
+            const oceanBubbles = document.getElementById('oceanBubbles');
+            const bubbleCount = 15;
+            
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.width = Math.random() * 20 + 10 + 'px';
+                bubble.style.height = bubble.style.width;
+                bubble.style.animationDelay = Math.random() * 8 + 's';
+                bubble.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                oceanBubbles.appendChild(bubble);
+            }
+        }
+        
+        // Initialize bubbles when page loads
+        window.addEventListener('load', createBubbles);
+    </script>
+</body>
+<script type="text/javascript" src="pb-common/index.js"></script>
+<script type="text/javascript" src="index.js"></script>
+</html> 
